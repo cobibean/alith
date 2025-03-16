@@ -4,9 +4,9 @@ import { type Tool, convertParametersToJson } from './tool'
 
 // Define the configuration structure for an Agent
 type AgentOptions = {
-  name: string // The name of the agent
+  name?: string // Optional agent name.
   model: string // The model used by the agent
-  preamble: string // Introductory text or context for the agent
+  preamble?: string // Introductory text or context for the agent
   baseUrl?: string // Optional base URL for API requests
   apiKey?: string // Optional API key for authentication
   tools?: Array<Tool> // Optional list of tools available to the agent
@@ -22,9 +22,9 @@ class Agent {
   /**
    * Creates an instance of Agent.
    * @param {AgentOptions} opts - The configuration object for the agent.
-   * @param {string} opts.name - The name of the agent.
+   * @param {string} opts.name - Optional agent name.
    * @param {string} opts.model - The model used by the agent.
-   * @param {string} opts.preamble - Introductory text or context for the agent.
+   * @param {string} opts.preamble - Optional introductory text or context for the agent.
    * @param {string} [opts.baseUrl] - Optional base URL for API requests.
    * @param {string} [opts.apiKey] - Optional API key for authentication.
    * @param {Array<Tool>} [opts.tools] - Optional list of tools available to the agent.
@@ -35,7 +35,7 @@ class Agent {
     this._opts = opts
     this._store = opts.store
     this._agent = new DelegateAgent(
-      opts.name,
+      opts.name ?? '',
       opts.model,
       opts.apiKey ?? '',
       opts.baseUrl ?? '',
@@ -63,7 +63,8 @@ class Agent {
         handler: (args: string) => {
           const tool_args = JSON.parse(args)
           const args_array = Object.values(tool_args)
-          return tool.handler(...args_array)
+          const result = tool.handler(...args_array)
+          return JSON.stringify(result)
         },
       })
     }
@@ -80,7 +81,7 @@ class Agent {
    * @returns {string} - The name of the agent.
    */
   name(): string {
-    return this._opts.name
+    return this._opts.name ?? ''
   }
 
   /**
@@ -89,6 +90,30 @@ class Agent {
    */
   model(): string {
     return this._opts.model
+  }
+
+  /**
+   * Returns the preamble of the agent.
+   * @returns {string} - The preamble of the agent.
+   */
+  preamble(): string | undefined {
+    return this._opts.preamble
+  }
+
+  /**
+   * Returns the base url of the agent.
+   * @returns {string} - The base url of the agent.
+   */
+  baseUrl(): string | undefined {
+    return this._opts.baseUrl
+  }
+
+  /**
+   * Returns the API key of the agent.
+   * @returns {string} - The API key of the agent.
+   */
+  apiKey(): string | undefined {
+    return this._opts.apiKey
   }
 }
 

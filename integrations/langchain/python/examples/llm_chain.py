@@ -1,7 +1,7 @@
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
-from langchain_alith import AlithLLM
+from langchain_alith import LLM
 from alith import Agent
 
 prompt = PromptTemplate.from_template(
@@ -11,16 +11,17 @@ Question: {question}
 """
 )
 
-agent = Agent(
-    name="A dummy Agent",
-    model="deepseek-chat",  # or `deepseek-reasoner` for DeepSeek R1 Model
-    api_key="<Your API Key>",  # Replace with your api key or read it from env.
-    base_url="api.deepseek.com",
-    preamble="You are a comedian here to entertain the user using humour and jokes.",
-)
+
+def main():
+    llm = LLM(
+        agent=Agent(
+            model="gpt-4",
+            preamble="You are a comedian here to entertain the user using humour and jokes.",
+        )
+    )
+    chain = {"question": RunnablePassthrough()} | prompt | llm | StrOutputParser()
+    print(chain.invoke("query"))
 
 
-def test_lanchain_alith():
-    llm = AlithLLM(agent=agent)
-    rag_chain = {"question": RunnablePassthrough()} | prompt | llm | StrOutputParser()
-    rag_chain.invoke("query")
+if __name__ == "__main__":
+    main()

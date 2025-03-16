@@ -8,22 +8,26 @@ from ._alith import DelegateTool as _DelegateTool
 
 @dataclass
 class Agent:
-    name: str
     model: str
+    name: Optional[str] = field(default_factory=str)
     preamble: Optional[str] = field(default_factory=str)
     api_key: Optional[str] = field(default_factory=str)
     base_url: Optional[str] = field(default_factory=str)
-    tools: List[Union[Tool, Callable, _DelegateTool]] = field(default_factory=list)
+    tools: List[Union[Tool, Callable]] = field(default_factory=list)
     mcp_config_path: Optional[str] = field(default_factory=str)
     store: Optional[Store] = None
 
     def prompt(self, prompt: str) -> str:
         tools = [
-            create_delegate_tool(tool) if isinstance(tool, Callable) else tool
+            (
+                create_delegate_tool(tool)
+                if isinstance(tool, Callable)
+                else tool.to_delegate_tool() if isinstance(tool, Tool) else tool
+            )
             for tool in self.tools or []
         ]
         agent = _DelegateAgent(
-            self.name,
+            self.name or "",
             self.model,
             self.api_key,
             self.base_url,

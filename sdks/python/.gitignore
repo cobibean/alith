@@ -14,3 +14,4 @@ alith.egg-info/
 .eggs/
 alith/_alith*
 llm_logs
+uv.lock
